@@ -1,0 +1,190 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="row mt-3">
+  <div class="col-8 offset-2">
+
+    <!-- ===== LISTING TITLE ===== -->
+    <h2><%= listing.title %></h2>
+
+    <!-- ===== LISTING CARD ===== -->
+    <div class="card show-card mb-3">
+      <img
+        class="card-img-top show-img"
+        src="<%= listing.image.url %>"
+        alt="Listing image"
+      />
+
+      <div class="card-body">
+        <p>
+          Owned by:
+          <i><%= listing.owner.username %></i>
+        </p>
+
+        <p><%= listing.description %></p>
+        <p>&#8377; <%= listing.price.toLocaleString("en-IN") %></p>
+
+        <!-- LOCATION -->
+        <p>
+          <%= listing.location %>, <%= listing.country %>
+        </p>
+
+         <h5>We are here !</h5>
+        <!-- MAP -->
+        <div id="map" style="height:400px;" class="mb-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LISTING ACTIONS (OWNER ONLY) ===== -->
+    <% if (currUser && listing.owner && listing.owner._id.equals(currUser._id)) { %>
+      <div class="d-flex gap-2 mb-4">
+        <a
+          href="/listings/<%= listing._id %>/edit"
+          class="btn btn-outline-primary"
+        >
+          Edit
+        </a>
+
+        <form
+          method="POST"
+          action="/listings/<%= listing._id %>?_method=DELETE"
+        >
+          <button class="btn btn-outline-danger">
+            Delete
+          </button>
+        </form>
+      </div>
+    <% } %>
+
+    <hr />
+
+    <!-- ===== REVIEW FORM ===== -->
+    <% if (currUser) { %>
+      <h4>Leave a Review</h4>
+
+      <form
+        action="/listings/<%= listing._id %>/reviews"
+        method="POST"
+        class="needs-validation"
+        novalidate
+      >
+        <div class="mb-3">
+          <label class="form-label">Rating</label>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            name="review[rating]"
+            class="form-range"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Comment</label>
+          <textarea
+            name="review[comment]"
+            class="form-control"
+            required
+          ></textarea>
+          <div class="invalid-feedback">
+            Please enter a comment
+          </div>
+        </div>
+
+        <button class="btn btn-success">
+          Submit Review
+        </button>
+      </form>
+
+      <hr />
+    <% } %>
+
+    <!-- ===== ALL REVIEWS ===== -->
+    <h4 class="mt-4">All Reviews</h4>
+
+    <% if (listing.reviews.length === 0) { %>
+      <p>No reviews yet.</p>
+    <% } %>
+
+    <% for (let review of listing.reviews) { %>
+      <% if (review && review.author) { %>
+
+        <div class="card mb-3">
+          <div class="card-body">
+
+            <h6 class="card-title">
+              @<%= review.author.username %>
+            </h6>
+
+            <p class="mb-1 text-warning">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <% if (i <= review.rating) { %>
+                  &#9733;
+                <% } else { %>
+                  &#9734;
+                <% } %>
+              <% } %>
+            </p>
+
+            <p class="card-text">
+              <%= review.comment %>
+            </p>
+
+            <% if (currUser && review.author._id.equals(currUser._id)) { %>
+              <form
+                method="POST"
+                action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+              >
+                <button class="btn btn-sm btn-dark">
+                  Delete
+                </button>
+              </form>
+            <% } %>
+
+          </div>
+        </div>
+
+      <% } %>
+    <% } %>
+
+  </div>
+</div>
+
+<!-- ===== LEAFLET MAP LIBRARY ===== -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  const locationName = "<%= listing.location %>, <%= listing.country %>";
+
+  async function initMap() {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}`
+      );
+      const data = await res.json();
+
+      if (!data || data.length === 0) return;
+
+      const lat = data[0].lat;
+      const lon = data[0].lon;
+
+      const map = L.map("map").setView([lat, lon], 10);
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        { attribution: "© OpenStreetMap" }
+      ).addTo(map);
+
+      L.marker([lat, lon])
+        .addTo(map)
+        .bindPopup(locationName)
+        .openPopup();
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  initMap();
+</script>

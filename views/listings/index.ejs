@@ -1,0 +1,202 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+/* ===== FILTER BAR ===== */
+.filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+#filters {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  flex: 1;
+  align-items: center;
+}
+
+#filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filter {
+  flex: 0 0 auto;
+  text-align: center;
+  opacity: 0.75;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.filter i {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.filter:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.gst-toggle {
+  margin-left: 1rem;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+/* ===== CARD ===== */
+.listing-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card {
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.card-img-top {
+  object-fit: cover;
+}
+.gst-toggle {
+  border: 1px solid black ;
+  border-radius: 1rem;
+  height: 3.5rem;
+  padding: 1rem;
+}
+
+/* GST TEXT */
+.gst-text {
+  display: none;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+</style>
+
+<!-- ===== FILTERS + GST SWITCH ===== -->
+<div class="filters-bar">
+
+  <div id="filters">
+    <div class="filter">
+      <i class="fa-solid fa-fire"></i>
+      <p>Trending</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-bed"></i>
+      <p>Rooms</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-building"></i>
+      <p>Apartments</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-house"></i>
+      <p>Villas</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-tree"></i>
+      <p>Cabins</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-water"></i>
+      <p>Beachfront</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-campground"></i>
+      <p>Camping</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-gem"></i>
+      <p>Luxury</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-wallet"></i>
+      <p>Budget</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-mountain"></i>
+      <p>Mountain</p>
+    </div>
+
+    <div class="filter">
+      <i class="fa-solid fa-city"></i>
+      <p>City</p>
+    </div>
+  </div>
+
+  <!-- GST SWITCH -->
+  <div class="gst-toggle">
+    <div class="form-check form-switch form-check-reverse">
+      <input class="form-check-input" type="checkbox" id="gstSwitch">
+      <label class="form-check-label" for="gstSwitch">
+       Display Total after Tax
+      </label>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== LISTINGS ===== -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
+  <% for (let listing of allListings) { %>
+
+    <div class="col mb-4">
+      <a href="/listings/<%= listing._id %>" class="listing-link">
+
+        <div class="card">
+          <img
+            class="card-img-top"
+            src="<%= listing.image.url %>"
+            alt="Listing image"
+            style="height: 20rem;"
+          >
+
+          <div class="card-body">
+            <p class="card-text">
+              <b><%= listing.title %></b><br>
+
+              &#8377; <%= listing.price %> / night
+
+              <span class="gst-text">
+                +18% GST applicable
+              </span>
+            </p>
+          </div>
+        </div>
+
+      </a>
+    </div>
+
+  <% } %>
+</div>
+
+<!-- ===== GST TOGGLE SCRIPT ===== -->
+<script>
+const gstSwitch = document.getElementById("gstSwitch");
+const gstTexts = document.querySelectorAll(".gst-text");
+
+gstSwitch.addEventListener("change", () => {
+  gstTexts.forEach(el => {
+    el.style.display = gstSwitch.checked ? "block" : "none";
+  });
+});
+</script>
